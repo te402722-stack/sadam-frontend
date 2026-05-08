@@ -20,7 +20,7 @@ import { solicitarPermisoNotificaciones } from "./utils/notificaciones";
 
 import { getToken } from "firebase/messaging";
 import { getMessagingSafe } from "./firebase";
-import api from "../config/api";
+import api from "./config/api";
 
 function App() {
 
@@ -44,47 +44,34 @@ function App() {
   }, []);
 
   /* 🔥 OBTENER Y ENVIAR TOKEN (CORRECTO) */
-  useEffect(() => {
-
+useEffect(() => {
   const obtenerYEnviarToken = async () => {
-
     try {
-
       const messaging = await getMessagingSafe();
-
       if (!messaging) return;
 
       const token = await getToken(messaging, {
-        vapidKey: "TU_VAPID_KEY"
+        vapidKey: "TU_VAPID_KEY" // Reemplaza esto con tu llave real de Firebase
       });
 
       console.log("TOKEN:", token);
 
       if (usuario?.id_adulto && token) {
-
-        await fetch(`${API_URL}/guardar-token`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id_adulto: usuario.id_adulto,
-            token
-          })
+        // Usamos 'api' que es lo que importaste arriba
+        await api.post("/guardar-token", {
+          id_adulto: usuario.id_adulto,
+          token: token
         });
-
         console.log("✅ Token guardado en backend");
-
       }
-
     } catch (error) {
       console.log("Error obteniendo token:", error);
     }
-
   };
 
   if (usuario) {
     obtenerYEnviarToken();
   }
-
 }, [usuario]);
 
 

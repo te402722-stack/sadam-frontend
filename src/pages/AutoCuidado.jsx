@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaSpa, FaSmile, FaTint, FaPills, FaHeartbeat } from "react-icons/fa";
-import API_URL from "../config/api";
+import api from "../config/api";
 
 function AutoCuidado({ irAEstadoAnimo }) {
 
@@ -38,7 +38,7 @@ function AutoCuidado({ irAEstadoAnimo }) {
       try {
 
         // 🔥 1. RESUMEN
-        const resResumen = await fetch(`${API_URL}/resumen/${usuario.id_adulto}`);
+        const resResumen = await api.get(`/resumen/${usuario.id_adulto}`);
         const dataResumen = await resResumen.json();
 
         setResumen({
@@ -49,7 +49,7 @@ function AutoCuidado({ irAEstadoAnimo }) {
         });
 
         // 🔥 2. DASHBOARD (AQUÍ VIENE EL ÁNIMO REAL)
-        const resDashboard = await fetch(`${API_URL}/dashboard-datos/${usuario.id_adulto}`);
+        const resDashboard = await api.get(`/dashboard-datos/${usuario.id_adulto}`);
         const dataDashboard = await resDashboard.json();
 
         if (dataDashboard.estado_animo && dataDashboard.estado_animo !== "Sin registro") {

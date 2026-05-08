@@ -89,8 +89,10 @@ function DatosIniciales({ onComplete, onBack }) {
     if (name === "correo" && value.length > 5) {
       try {
         setLoadingCorreo(true);
-        const res = await fetch(`${API_URL}/verificar-correo?correo=${value}`);
-        const data = await res.json();
+      
+        const res = await api.get("/verificar-correo", {
+          params: { correo: value }
+        });
 
         if (data.existe) {
           setErrores((prev) => ({
@@ -134,16 +136,13 @@ function DatosIniciales({ onComplete, onBack }) {
     if (!validarTodo()) return;
 
     try {
-      const res = await fetch(`${API_URL}/usuarios`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: form.nombre,
-          correo: form.correo,
-          telefono: form.telefono,
-          password: form.contraseña,
-          fechaNacimiento: form.fechaNacimiento
-        })
+      
+      const res = await api.post("/usuarios", {
+        nombre: form.nombre,
+        correo: form.correo,
+        telefono: form.telefono,
+        password: form.contraseña,
+        fechaNacimiento: form.fechaNacimiento
       });
 
       const data = await res.json();

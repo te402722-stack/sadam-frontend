@@ -50,21 +50,13 @@ function Sintomas({ onBack, onCalendario, onInicio, onGuardado}) {
   }
 
   try {
-
-    for (let sintoma of seleccionados) {
-
-      await fetch(`${API_URL}/sintomas`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
+      // ✅ Usamos la instancia 'api' (Axios) en lugar de fetch
+      for (let sintoma of seleccionados) {
+        await api.post("/sintomas", {
           id_adulto: id_adulto,
           sintoma: sintoma
-        })
-      });
-
-    }
+        });
+      }
 
     setGuardado(true);
 

@@ -36,16 +36,10 @@ function Login({ onLogin, onCreateAccount }) {
     setCargando(true);
 
     try {
-
-      const res = await fetch(`${API_URL}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          correo,
-          password
-        })
+  
+      const res = await api.post("/login", {
+        correo,
+        password
       });
 
       const data = await res.json();

@@ -70,24 +70,10 @@ const [guardado, setGuardado] = useState(false);
       return;
     }
 
-    const response = await fetch(`${API_URL}/actividades`, {
-
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json"
-      },
-
-      body: JSON.stringify({
+    await api.post("/actividades", {
         id_adulto,
         actividades: actividadesCompletadas
-      })
-
-    });
-
-    const data = await response.json();
-
-    console.log(data);
+      });
     setGuardado(true);
 
     alert("Actividades guardadas");

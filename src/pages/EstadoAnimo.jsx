@@ -41,21 +41,13 @@ function EstadoAnimo({ onBack,onCalendario, onInicio, onGuardado }) {
   }
 
   try {
-
-    for (let animo of seleccionados) {
-
-      await fetch(`${API_URL}/animo`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
+    
+      for (let animo of seleccionados) {
+        await api.post("/animo", {
           id_adulto,
           animo
-        })
-      });
-
-    }
+        });
+      }
 
     setGuardado(true);
 

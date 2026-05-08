@@ -150,7 +150,7 @@ function Calendario({ onBack }) {
       try {
         const id = localStorage.getItem("id_adulto");
 
-        const res = await fetch(`${API_URL}/recordatorios/${id}`);
+        const res = await api.get(`/recordatorios/${id}`);
         const data = await res.json();
 
         const expandido = [];
@@ -241,13 +241,9 @@ function Calendario({ onBack }) {
 
   const completarRecordatorio = async (id) => {
     try {
-      await fetch(`${API_URL}/recordatorios/completar`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id_recordatorio: id,
-          id_adulto: localStorage.getItem("id_adulto")
-        })
+      await api.post("/recordatorios/completar", {
+        id_recordatorio: id,
+        id_adulto: localStorage.getItem("id_adulto")
       });
 
       setRecordatorios(prev =>
