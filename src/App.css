@@ -1,0 +1,205 @@
+/* RESET GENERAL */
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+body{
+margin:0;
+font-family:system-ui, Arial, sans-serif;
+background:#f4f6fb;
+}
+
+#root{
+width:100%;
+height:100%;
+margin:0;
+padding:0;
+}
+
+
+
+/* ============================= */
+/* FONDO APP */
+/* ============================= */
+
+.fondo-app{
+min-height:100vh;
+background:linear-gradient(135deg,#6C63FF,#9D94FF);
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px;
+}
+
+
+
+/* ============================= */
+/* TARJETA FORMULARIO */
+/* ============================= */
+
+.card-form{
+width:100%;
+max-width:420px;
+background:white;
+padding:40px;
+border-radius:28px;
+box-shadow:0 20px 40px rgba(0,0,0,0.25);
+display:flex;
+flex-direction:column;
+gap:16px;
+}
+
+
+
+/* TITULO */
+
+.titulo{
+text-align:center;
+color:#6C63FF;
+margin-bottom:10px;
+font-size:26px;
+font-weight:bold;
+}
+
+
+
+/* INPUTS */
+
+.input-group{
+display:flex;
+align-items:center;
+background:#f4f4ff;
+padding:12px;
+border-radius:12px;
+gap:10px;
+}
+
+.input-group svg{
+color:#6C63FF;
+}
+
+.input-group input{
+flex:1;
+border:none;
+outline:none;
+background:transparent;
+font-size:15px;
+}
+
+
+
+/* BOTON */
+
+.btn-crear{
+margin-top:10px;
+padding:14px;
+border:none;
+border-radius:18px;
+background:linear-gradient(90deg,#6C63FF,#5a52d4);
+color:white;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+transition:transform .15s ease;
+}
+
+.btn-crear:active{
+transform:scale(.96);
+}
+
+
+
+/* ============================= */
+/* PANTALLAS CENTRO */
+/* ============================= */
+
+.pantalla-centro{
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+text-align:center;
+background:linear-gradient(135deg,#6C63FF,#9D94FF);
+}
+
+
+
+/* TARJETA MENSAJES */
+
+.card-mensaje{
+background:white;
+padding:50px;
+border-radius:30px;
+box-shadow:0 25px 50px rgba(0,0,0,0.3);
+animation:fadeIn .6s ease;
+max-width:350px;
+}
+
+
+
+/* CHECK */
+
+.check-animado{
+font-size:80px;
+color:#4CAF50;
+animation:pop .6s ease;
+margin-bottom:10px;
+}
+
+
+
+/* LOADER */
+
+.loader{
+width:60px;
+height:60px;
+border:6px solid #eee;
+border-top:6px solid #6C63FF;
+border-radius:50%;
+animation:spin 1s linear infinite;
+margin:auto;
+margin-bottom:20px;
+}
+
+
+
+/* ============================= */
+/* ANIMACIONES */
+/* ============================= */
+
+@keyframes spin{
+0%{transform:rotate(0deg)}
+100%{transform:rotate(360deg)}
+}
+
+@keyframes pop{
+0%{transform:scale(0)}
+80%{transform:scale(1.2)}
+100%{transform:scale(1)}
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(20px)}
+to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes pop {
+
+0% {
+transform: scale(0.7);
+opacity:0;
+}
+
+100% {
+transform: scale(1);
+opacity:1;
+}
+
+}
+
+.animate-pop {
+animation: pop 0.3s ease;
+}

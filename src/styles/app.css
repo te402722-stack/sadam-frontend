@@ -1,0 +1,101 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #F5F5F5;
+}
+
+/* CONTENEDOR GENERAL */
+.screen {
+  width: 390px;
+  height: 844px;
+  margin: auto;
+  background: white;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+/* LOGIN */
+
+.logo-container {
+  text-align: center;
+  margin-top: 60px;
+}
+
+.logo-text {
+  font-size: 42px;
+  font-weight: bold;
+  color: #F4A300;
+  margin-top: 10px;
+}
+
+.subtitle {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.subtitle h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.subtitle p {
+  font-size: 14px;
+  color: #666;
+}
+
+.input {
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.primary-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  border-radius: 10px;
+  border: none;
+  background: #3B6FE6;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.google-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 15px;
+  border-radius: 10px;
+  border: none;
+  background: #E0E0E0;
+  cursor: pointer;
+}
+
+/* DATOS */
+
+.screen-purple {
+  width: 390px;
+  height: 844px;
+  margin: auto;
+  background: #B9B4D6;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+.section-title {
+  color: #F4A300;
+  font-weight: 600;
+  margin-top: 20px;
+}
+
+.data-input {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #E5E5E5;
+}
