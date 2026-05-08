@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 // Importamos la instancia centralizada
-import API_URL from "../config/api";
+import api from "../config/api";
 
 export default function AlertasToast({ id_adulto }) {
   const [recordatorios, setRecordatorios] = useState([]);

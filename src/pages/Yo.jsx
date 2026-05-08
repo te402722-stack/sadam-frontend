@@ -10,7 +10,7 @@ import {
 } from "react-icons/fa";
 
 import { obtenerCuidadores } from "../services/cuidadoresService";
-import API_URL from "../config/api";
+import api from "../config/api";
 
 function Yo({ onBack }) {
 

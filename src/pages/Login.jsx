@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-import API_URL from "../config/api";
+import api from "../config/api";
 
 function Login({ onLogin, onCreateAccount }) {
 

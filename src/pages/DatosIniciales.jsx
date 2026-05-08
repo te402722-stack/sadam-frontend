@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaUser, FaPhone, FaHome, FaLock, FaEnvelope, FaCopy, FaBirthdayCake } from "react-icons/fa";
-import API_URL from "../config/api";
+import api from "../config/api";
 function DatosIniciales({ onComplete, onBack }) {
 
   const [pantalla, setPantalla] = useState("form");

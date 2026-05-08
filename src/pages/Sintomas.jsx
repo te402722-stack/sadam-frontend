@@ -10,7 +10,7 @@ import fiebreIcon from "../assets/icons/fiebre.svg";
 import faltaAireIcon from "../assets/icons/faltaAire.svg";
 import nauseasIcon from "../assets/icons/nauseas.svg";
 import debilidadIcon from "../assets/icons/debilidad.svg";
-import API_URL from "../config/api";
+import api from "../config/api";
 
 function Sintomas({ onBack, onCalendario, onInicio, onGuardado}) {
   const [seleccionados, setSeleccionados] = useState([]);

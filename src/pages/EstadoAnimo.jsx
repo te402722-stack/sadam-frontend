@@ -8,7 +8,7 @@ import aburridoIcon from "../assets/icons/aburrido.svg";
 import enfermoIcon from "../assets/icons/enfermo.svg";
 import preocupadoIcon from "../assets/icons/preocupado.svg";
 import debilIcon from "../assets/icons/debil.svg";
-import API_URL from "../config/api";
+import api from "../config/api";
 
 function EstadoAnimo({ onBack,onCalendario, onInicio, onGuardado }) {
   const [seleccionados, setSeleccionados] = useState([]);

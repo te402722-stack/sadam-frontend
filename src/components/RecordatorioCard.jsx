@@ -1,4 +1,4 @@
-import API_URL from "../config/api";
+import api from "../config/api";
 
 function RecordatorioCard({ recordatorio, onActualizar }) {
 

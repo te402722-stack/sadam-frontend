@@ -20,7 +20,7 @@ import { solicitarPermisoNotificaciones } from "./utils/notificaciones";
 
 import { getToken } from "firebase/messaging";
 import { getMessagingSafe } from "./firebase";
-import API_URL from "./config/api";
+import api from "../config/api";
 
 function App() {
 

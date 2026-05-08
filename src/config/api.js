@@ -1,3 +1,9 @@
-const API_URL = "https://sadam-backend.onrender.com";
+import axios from "axios";
 
-export default API_URL;
+const API_BASE_URL = "https://sadam-backend.onrender.com";
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+export default api;

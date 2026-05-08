@@ -9,7 +9,7 @@ import {
   FaHeartbeat,
   FaWalking
 } from "react-icons/fa";
-import API_URL from "../config/api";
+import api from "../config/api";
 
 function Calendario({ onBack }) {
 

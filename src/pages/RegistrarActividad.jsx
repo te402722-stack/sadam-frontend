@@ -7,7 +7,7 @@ import comerIcon from "../assets/icons/comer.svg";
 import dormirIcon from "../assets/icons/dormir.svg";
 import caminarIcon from "../assets/icons/caminar.svg";
 import otroIcon from "../assets/icons/otros.svg";
-import API_URL from "../config/api";
+import api from "../config/api";
 
 function RegistrarActividad({ onBack }) {
 const [guardado, setGuardado] = useState(false);

@@ -1,5 +1,5 @@
 import { CheckCircle, XCircle } from "lucide-react";
-import API_URL from "../config/api"
+import api from "../config/api";
 
 export default function RecordatorioActivo({ recordatorio, cerrar }) {
 
