@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import api from "../api";
+import API_URL from "../config/api";
 
 export default function useRecordatorios(id_adulto) {
 
