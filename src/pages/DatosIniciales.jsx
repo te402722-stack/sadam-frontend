@@ -91,10 +91,12 @@ function DatosIniciales({ onComplete, onBack }) {
         setLoadingCorreo(true);
       
         const res = await api.get("/verificar-correo", {
-          params: { correo: value }
-        });
+  params: { correo: value }
+});
 
-        if (data.existe) {
+const data = res.data;
+
+if (data.existe) {
           setErrores((prev) => ({
             ...prev,
             correo: "Este correo ya está registrado"
@@ -136,16 +138,16 @@ function DatosIniciales({ onComplete, onBack }) {
     if (!validarTodo()) return;
 
     try {
-      
-      const res = await api.post("/usuarios", {
-        nombre: form.nombre,
-        correo: form.correo,
-        telefono: form.telefono,
-        password: form.contraseña,
-        fechaNacimiento: form.fechaNacimiento
-      });
 
-      const data = await res.json();
+      const res = await api.post("/usuarios", {
+  nombre: form.nombre,
+  correo: form.correo,
+  telefono: form.telefono,
+  password: form.contraseña,
+  fecha_nacimiento: form.fechaNacimiento
+});
+
+const data = res.data;
 
       if (res.ok) {
         setCodigoInvitacion(data.codigo_invitacion);

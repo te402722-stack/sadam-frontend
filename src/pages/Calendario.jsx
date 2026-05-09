@@ -150,8 +150,9 @@ function Calendario({ onBack }) {
       try {
         const id = localStorage.getItem("id_adulto");
 
+        
         const res = await api.get(`/recordatorios/${id}`);
-        const data = await res.json();
+const data = res.data;
 
         const expandido = [];
 
