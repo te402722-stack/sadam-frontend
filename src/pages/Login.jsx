@@ -15,73 +15,66 @@ function Login({ onLogin, onCreateAccount }) {
 
   const handleLogin = async () => {
 
-    setError("");
+  setError("");
 
-    // VALIDACIONES
-    if (!correo.trim() || !password.trim()) {
-      setError("Debes completar todos los campos.");
-      return;
+  if (!correo.trim() || !password.trim()) {
+    setError("Debes completar todos los campos.");
+    return;
+  }
+
+  if (!validarEmail(correo)) {
+    setError("El correo electrónico no es válido.");
+    return;
+  }
+
+  if (password.length < 6) {
+    setError("La contraseña debe tener al menos 6 caracteres.");
+    return;
+  }
+
+  setCargando(true);
+
+  try {
+
+    const res = await api.post("/login", {
+      correo,
+      password
+    });
+
+    const usuario = res.data.usuario;
+
+    localStorage.setItem("usuario", JSON.stringify(usuario));
+    localStorage.setItem("adulto", JSON.stringify(usuario));
+
+    const id_adulto = usuario.id_adulto;
+
+    if (id_adulto) {
+      localStorage.setItem("id_adulto", id_adulto.toString());
     }
 
-    if (!validarEmail(correo)) {
-      setError("El correo electrónico no es válido.");
-      return;
+    console.log("ID adulto guardado:", id_adulto);
+
+    if (onLogin) {
+      onLogin(usuario);
     }
 
-    if (password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
-      return;
-    }
+  } catch (err) {
 
-    setCargando(true);
+    console.error("ERROR LOGIN:", err);
 
-    try {
-  
-      const res = await api.post("/login", {
-        correo,
-        password
-      });
-
-      
-const data = res.data;
-
-      if (!res.ok) {
-        setError(data.mensaje || "Correo o contraseña incorrectos.");
-        setCargando(false);
-        return;
-      }
-
-      // GUARDAR SESIÓN
-      const usuario = data.usuario;
-
-      localStorage.setItem("usuario", JSON.stringify(usuario));
-      localStorage.setItem("adulto", JSON.stringify(usuario));
-
-      const id_adulto = usuario.id_adulto || data.id_adulto;
-
-      if (id_adulto) {
-        localStorage.setItem("id_adulto", id_adulto.toString());
-      }
-
-      console.log("ID adulto guardado:", id_adulto);
-
-      // ENTRAR A LA APP
-      if (onLogin) {
-        onLogin(usuario);
-      }
-
-    } catch (err) {
-
-      console.error(err);
+    if (err.response) {
+      setError(err.response.data.mensaje || "Error en login");
+    } else {
       setError("No se pudo conectar con el servidor.");
-
-    } finally {
-
-      setCargando(false);
-
     }
 
-  };
+  } finally {
+
+    setCargando(false);
+
+  }
+
+};
 
   return (
 
@@ -146,11 +139,6 @@ const data = res.data;
           Crear cuenta
         </button>
 
-        {/* GOOGLE */}
-        <button className="w-full flex items-center justify-center gap-3 border py-3 rounded-xl">
-          <FcGoogle size={22}/>
-          Continuar con Google
-        </button>
 
       </div>
 
