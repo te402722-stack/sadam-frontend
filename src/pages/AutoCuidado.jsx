@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { FaSpa, FaSmile, FaTint, FaPills, FaHeartbeat, FaChevronRight } from "react-icons/fa";
 import api from "../config/api";
 
-function AutoCuidado() {
-  const navigate = useNavigate(); // Hook para cambiar de pantalla
+// Recibimos 'irAEstadoAnimo' como prop desde App.js
+function AutoCuidado({ irAEstadoAnimo }) {
+  // ❌ BORRADO: const navigate = useNavigate(); (Esto causaba el error)
+
   const [animoHoy, setAnimoHoy] = useState(null);
   const [resumen, setResumen] = useState({
     agua: 0,
@@ -13,7 +15,6 @@ function AutoCuidado() {
   });
   const [loading, setLoading] = useState(true);
 
-  // Consejos con lenguaje orientado a adultos mayores
   const [consejoHoy] = useState(() => {
     const consejos = [
       "No olvide tomar un vasito de agua, le hará sentirse muy bien 💧",
@@ -27,11 +28,8 @@ function AutoCuidado() {
   });
 
   useEffect(() => {
-    // Usamos 'adulto' ya que es la clave que usas en el perfil
     const usuario = JSON.parse(localStorage.getItem("adulto"));
-
     if (!usuario || !usuario.id_adulto) {
-      console.error("No hay información del usuario");
       setLoading(false);
       return;
     }
@@ -62,21 +60,6 @@ function AutoCuidado() {
     cargarDatos();
   }, []);
 
-  // Función para ir a la pantalla de estado de ánimo
-  const manejarNavegacionAnimo = () => {
-    // Aquí pon la ruta exacta que tengas en tu App.js (ej: "/estado-animo")
-    navigate("/registro-animo"); 
-  };
-
-  if (loading) {
-    return (
-      <div className="w-full h-64 flex flex-col items-center justify-center gap-4">
-        <div className="w-12 h-12 border-4 border-green-100 border-t-green-500 rounded-full animate-spin"></div>
-        <p className="text-gray-400 font-medium">Preparando su diario...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full flex flex-col p-6 gap-6 animate-in fade-in duration-500">
       
@@ -101,7 +84,7 @@ function AutoCuidado() {
         {animoHoy ? (
           <div className="flex items-center justify-between bg-yellow-50/50 p-4 rounded-3xl border border-yellow-100">
             <div className="flex items-center gap-5">
-              <span className="text-6xl animate-bounce-slow inline-block">{animoHoy}</span>
+              <span className="text-6xl inline-block">{animoHoy}</span>
               <div>
                 <p className="text-xl font-black text-gray-800">¡Qué alegría!</p>
                 <p className="text-gray-500 text-sm">Ya nos contó cómo está</p>
@@ -110,9 +93,9 @@ function AutoCuidado() {
           </div>
         ) : (
           <div className="text-center py-2">
-            <p className="text-gray-500 mb-5 text-base">Nos gustaría mucho saber cómo se encuentra en este momento.</p>
+            <p className="text-gray-500 mb-5 text-base">Nos gustaría mucho saber cómo se encuentra.</p>
             <button
-              onClick={manejarNavegacionAnimo}
+              onClick={irAEstadoAnimo} // ✅ Usamos la prop de App.js
               className="group w-full bg-[#F28B82] hover:bg-[#ee7368] text-white py-5 rounded-2xl font-black shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 text-lg"
             >
               Decir cómo me siento
@@ -135,33 +118,18 @@ function AutoCuidado() {
 
       {/* RESUMEN SEMANAL */}
       <div>
-        <h2 className="font-black text-gray-800 mb-4 ml-2 uppercase text-xs tracking-widest text-gray-400">Su progreso de la semana</h2>
+        <h2 className="font-black text-gray-800 mb-4 ml-2 uppercase text-xs tracking-widest text-gray-400">Su progreso</h2>
         <div className="grid grid-cols-2 gap-4">
-          
           <div className="bg-blue-50/50 border border-blue-100 p-5 rounded-[28px] text-center">
             <FaTint className="mx-auto text-blue-500 text-2xl mb-2"/>
             <span className="block text-3xl font-black text-blue-700">{resumen.agua}</span>
             <span className="text-[10px] font-bold text-blue-400 uppercase">Días hidratado</span>
           </div>
-
           <div className="bg-green-50/50 border border-green-100 p-5 rounded-[28px] text-center">
             <FaPills className="mx-auto text-green-500 text-2xl mb-2"/>
             <span className="block text-3xl font-black text-green-700">{resumen.medicamentos}</span>
             <span className="text-[10px] font-bold text-green-400 uppercase">Medicinas al día</span>
           </div>
-
-          <div className="bg-purple-50/50 border border-purple-100 p-5 rounded-[28px] text-center">
-            <FaSmile className="mx-auto text-purple-500 text-2xl mb-2"/>
-            <span className="block text-2xl font-black text-purple-700 truncate">{resumen.animoFrecuente}</span>
-            <span className="text-[10px] font-bold text-purple-400 uppercase">Su ánimo común</span>
-          </div>
-
-          <div className="bg-rose-50/50 border border-rose-100 p-5 rounded-[28px] text-center">
-            <FaHeartbeat className="mx-auto text-rose-500 text-2xl mb-2"/>
-            <span className="block text-2xl font-black text-rose-700 truncate">{resumen.sintomaFrecuente}</span>
-            <span className="text-[10px] font-bold text-rose-400 uppercase">Molestia común</span>
-          </div>
-
         </div>
       </div>
     </div>
