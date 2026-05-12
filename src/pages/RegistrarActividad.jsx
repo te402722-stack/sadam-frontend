@@ -12,13 +12,13 @@ import api from "../config/api";
 function RegistrarActividad({ onBack }) {
   const [guardado, setGuardado] = useState(false);
   const [cargando, setCargando] = useState(false);
-  const [otraActividadNombre, setOtraActividadNombre] = useState(""); // Estado para el texto personalizado
+  const [otraActividadNombre, setOtraActividadNombre] = useState("");
   
   const [actividades, setActividades] = useState([
-    { id: 1, nombre: "Comer", icono: comerIcon, color: "bg-orange-50", circulo: "bg-orange-200", completado: false },
-    { id: 2, nombre: "Dormir", icono: dormirIcon, color: "bg-purple-50", circulo: "bg-purple-200", completado: false },
-    { id: 3, nombre: "Caminata", icono: caminarIcon, color: "bg-green-50", circulo: "bg-green-200", completado: false },
-    { id: 4, nombre: "Otra Actividad", icono: otroIcon, color: "bg-gray-50", circulo: "bg-gray-200", completado: false, esPersonalizada: true }
+    { nombre: "Comer", icono: comerIcon, color: "bg-orange-100", circulo: "bg-orange-200", completado: false },
+    { nombre: "Dormir", icono: dormirIcon, color: "bg-purple-100", circulo: "bg-purple-200", completado: false },
+    { nombre: "Caminata", icono: caminarIcon, color: "bg-green-100", circulo: "bg-green-200", completado: false },
+    { nombre: "Otra Actividad", icono: otroIcon, color: "bg-gray-100", circulo: "bg-gray-200", completado: false, esPersonalizada: true }
   ]);
 
   const toggleActividad = (index) => {
@@ -34,10 +34,8 @@ function RegistrarActividad({ onBack }) {
     const seleccionadas = actividades.filter(a => a.completado);
     if (seleccionadas.length === 0) return;
 
-    // Validar si seleccionó "Otra" pero no escribió nada
-    const tieneOtraSinNombre = seleccionadas.find(a => a.esPersonalizada && !otraActividadNombre.trim());
-    if (tieneOtraSinNombre) {
-      alert("Por favor, escribe el nombre de la otra actividad");
+    if (seleccionadas.find(a => a.esPersonalizada && !otraActividadNombre.trim())) {
+      alert("Escribe el nombre de la otra actividad");
       return;
     }
 
@@ -46,86 +44,83 @@ function RegistrarActividad({ onBack }) {
       const id_adulto = localStorage.getItem("id_adulto");
       const horaActual = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
-      const payload = {
+      await api.post("/actividades", {
         id_adulto,
         actividades: seleccionadas.map(a => ({
-          // Si es la personalizada, usamos el texto del input, si no, su nombre normal
           actividad: a.esPersonalizada ? otraActividadNombre : a.nombre,
           hora: horaActual
         }))
-      };
-
-      await api.post("/actividades", payload);
+      });
       setGuardado(true);
-      setTimeout(() => onBack(), 2000);
     } catch (error) {
-      console.error("Error guardando actividades", error);
+      console.error("Error", error);
     } finally {
       setCargando(false);
     }
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#F4F7FF] overflow-hidden">
-      <header className="px-6 pt-6 pb-4 flex items-center gap-4 shrink-0">
-        <button onClick={onBack} className="bg-white p-3 rounded-xl shadow-sm text-gray-600">
-          <FaArrowLeft />
-        </button>
-        <h1 className="text-xl font-black text-slate-800 tracking-tight">Actividades</h1>
+    // Centramos el contenido con max-w-md para que en Web no se vea gigante
+    <div className="flex flex-col h-screen bg-[#F4F7FF] max-w-md mx-auto shadow-2xl relative overflow-hidden">
+      
+      {/* HEADER ORIGINAL */}
+      <header className="px-6 pt-4 pb-2 flex items-center gap-4 shrink-0">
+        <button onClick={onBack} className="text-2xl font-bold text-gray-700 p-1"> ← </button>
+        <h1 className="text-xl font-bold text-gray-800">Actividades de Hoy</h1>
       </header>
 
-      <section className="px-6 mb-6 shrink-0">
-        <div className="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-xs font-black text-slate-400 uppercase">Progreso</span>
-            <span className="text-xs font-black text-indigo-600">{completadas} / {actividades.length}</span>
+      {/* PROGRESO ORIGINAL */}
+      <section className="px-6 mb-4 shrink-0">
+        <div className="bg-white p-4 rounded-2xl shadow-md border border-blue-50">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-gray-600 font-medium">Progreso</span>
+            <span className="text-sm font-bold text-gray-800 bg-blue-50 px-2 py-1 rounded-lg">
+              {completadas} de {actividades.length}
+            </span>
           </div>
-          <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-            <motion.div className="h-full bg-indigo-500" animate={{ width: `${progreso}%` }} />
+          <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+            <motion.div className="h-full bg-green-500" animate={{ width: `${progreso}%` }} />
           </div>
         </div>
       </section>
 
-      <main className="flex-1 px-6 space-y-3 overflow-y-auto pb-40">
+      {/* LISTA ORIGINAL */}
+      <main className="flex-1 px-6 space-y-2 overflow-y-auto pb-44"> 
         {actividades.map((item, index) => (
-          <div key={item.id} className="flex flex-col gap-2">
-            <motion.div
-              whileTap={{ scale: 0.98 }}
+          <div key={index}>
+            <div
               onClick={() => toggleActividad(index)}
-              className={`flex items-center justify-between p-5 rounded-[2rem] transition-all border-2 cursor-pointer
-                ${item.completado ? "bg-white border-indigo-500 shadow-lg" : `${item.color} border-transparent shadow-sm`}
+              className={`flex items-center justify-between p-3 rounded-2xl shadow-sm border-2 transition-all
+                ${item.completado ? "bg-white border-green-400" : `${item.color} border-transparent`}
               `}
             >
-              <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${item.circulo}`}>
-                  <img src={item.icono} alt="" className="w-8 h-8" />
+              <div className="flex items-center gap-3">
+                <div className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${item.circulo}`}>
+                  <img src={item.icono} alt="" className="w-6 h-6" />
                 </div>
-                <span className="text-lg font-bold text-slate-800">{item.nombre}</span>
+                <span className="text-base font-bold text-gray-800">{item.nombre}</span>
               </div>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${item.completado ? "bg-indigo-500 border-indigo-500 text-white" : "border-slate-200 bg-white"}`}>
-                {item.completado && <FaCheck size={14} />}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${item.completado ? "bg-green-500 border-green-500 text-white" : "border-gray-300 bg-white"}`}>
+                {item.completado && <FaCheck size={12} />}
               </div>
-            </motion.div>
+            </div>
 
-            {/* INPUT DINÁMICO: Solo aparece si selecciona "Otra Actividad" */}
+            {/* Input para Otra Actividad (solo si se selecciona) */}
             <AnimatePresence>
               {item.esPersonalizada && item.completado && (
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="px-4 pb-2"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-2 px-2"
                 >
-                  <div className="relative">
-                    <FaEdit className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" />
-                    <input
-                      type="text"
-                      placeholder="¿Qué actividad realizó?"
-                      value={otraActividadNombre}
-                      onChange={(e) => setOtraActividadNombre(e.target.value)}
-                      className="w-full bg-white border-2 border-indigo-100 rounded-2xl py-3 pl-12 pr-4 text-sm font-bold text-slate-700 focus:border-indigo-500 outline-none transition-all shadow-inner"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="¿Qué otra actividad hizo?"
+                    value={otraActividadNombre}
+                    onChange={(e) => setOtraActividadNombre(e.target.value)}
+                    className="w-full p-3 rounded-xl border-2 border-gray-200 text-sm font-medium outline-none focus:border-blue-400 transition-all shadow-inner"
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -133,20 +128,22 @@ function RegistrarActividad({ onBack }) {
         ))}
       </main>
 
-      <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-[#F4F7FF] to-transparent">
+      {/* BOTÓN FLOTANTE ORIGINAL */}
+      <div className="fixed bottom-[80px] left-1/2 -translate-x-1/2 w-full max-w-md px-6 z-40">
         <motion.button
-          disabled={completadas === 0 || cargando}
           whileTap={{ scale: 0.95 }}
           onClick={guardarActividad}
-          className={`w-full py-5 rounded-[2rem] text-lg font-black uppercase tracking-widest shadow-xl transition-all
-            ${completadas === 0 || cargando ? "bg-slate-200 text-slate-400" : "bg-[#E6ED3B] text-slate-800"}
+          className={`w-full py-4 rounded-2xl text-lg font-black uppercase shadow-lg transition-all
+            ${completadas === 0 || cargando ? "bg-gray-300 text-gray-500" : "bg-[#E6ED3B] text-gray-800"}
           `}
         >
-          {cargando ? "Guardando..." : "Finalizar Registro"}
+          {cargando ? "Guardando..." : "Guardar Actividades"}
         </motion.button>
       </div>
 
-      {guardado && <RegistroExitoso mensaje="¡Guardado con éxito!" onClose={() => setGuardado(false)} />}
+      <div className="h-[75px] shrink-0" />
+
+      {guardado && <RegistroExitoso mensaje="Actividad registrada" onClose={() => setGuardado(false)} />}
     </div>
   );
 }
