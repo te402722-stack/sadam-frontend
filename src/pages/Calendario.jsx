@@ -47,9 +47,8 @@ function Calendario({ onBack }) {
         return new Date(d.getFullYear(), d.getMonth(), d.getDate());
       }
 
-      
-const [y, m, d] = fechaStr.split("-").map(Number);
-return new Date(y, m - 1, d, 12, 0, 0, 0);
+      const [y, m, d] = fechaStr.split("-").map(Number);
+      return new Date(y, m - 1, d);
 
     } catch {
       return null;
@@ -68,14 +67,14 @@ return new Date(y, m - 1, d, 12, 0, 0, 0);
   };
 
   const esMismoDia = (fecha, day, month, year) => {
-  if (!fecha) return false;
-  return (
-    fecha.getDate() === Number(day) &&
-    fecha.getMonth() === Number(month) &&
-    fecha.getFullYear() === Number(year)
-  );
-};
-  
+    if (!fecha) return false;
+
+    return (
+      fecha.getDate() === day &&
+      fecha.getMonth() === month &&
+      fecha.getFullYear() === year
+    );
+  };
 
   /* =========================
      ICONOS
@@ -168,10 +167,8 @@ const data = res.data;
 
           for (let d = 0; d < duracion; d++) {
 
-            // Usamos el tiempo en milisegundos para sumar días exactos sin errores de desbordamiento de mes
-const fechaBase = new Date(inicio.getTime());
-fechaBase.setDate(inicio.getDate() + d);
-fechaBase.setHours(12, 0, 0, 0); // Forzamos mediodía en cada iteración
+            const fechaBase = new Date(inicio);
+            fechaBase.setDate(fechaBase.getDate() + d);
 
             if (frecuencia === "Diario") {
 
