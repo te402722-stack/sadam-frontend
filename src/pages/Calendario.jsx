@@ -10,7 +10,7 @@ function Calendario({ onBack }) {
   const [currentDate, setCurrentDate] = useState(today);
   const [selectedDay, setSelectedDay] = useState(today.getDate());
   const [recordatorios, setRecordatorios] = useState([]);
-  const [loading, setLoading] = useState(true); // Para saber si está cargando
+  const [loading, setLoading] = useState(true);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -24,15 +24,12 @@ function Calendario({ onBack }) {
   for (let i = 0; i < startDay; i++) days.push(null);
   for (let i = 1; i <= daysInMonth; i++) days.push(i);
 
-  // --- HELPERS DE FECHA ---
+  // --- HELPERS ---
   const parseFechaLocal = (fechaStr) => {
     if (!fechaStr) return null;
-    // Si ya es objeto Date, devolverlo
-    if (fechaStr instanceof Date) return fechaStr;
-    // Limpiar el string si viene con T00:00:00...
     const limpia = fechaStr.split('T')[0];
     const [y, m, d] = limpia.split("-").map(Number);
-    return new Date(y, m - 1, d, 12, 0, 0); // Forzar mediodía
+    return new Date(y, m - 1, d, 12, 0, 0);
   };
 
   const formatearFechaLocal = (date) => {
@@ -47,23 +44,29 @@ function Calendario({ onBack }) {
     return fecha.getDate() === d && fecha.getMonth() === m && fecha.getFullYear() === y;
   };
 
-  // --- CARGA DE DATOS ---
+  const iconoTipo = (tipo, colorClass = "") => {
+    switch (tipo?.toLowerCase()) {
+      case "medicamento": return <FaPills className={`text-red-500 ${colorClass}`} />;
+      case "agua": return <FaTint className={`text-blue-500 ${colorClass}`} />;
+      case "cita": return <FaHeartbeat className={`text-green-500 ${colorClass}`} />;
+      case "actividad": return <FaWalking className={`text-purple-500 ${colorClass}`} />;
+      default: return <FaBell className={`text-gray-400 ${colorClass}`} />;
+    }
+  };
+
+  // --- CARGA ---
   useEffect(() => {
     const cargar = async () => {
       try {
         setLoading(true);
         const id = localStorage.getItem("id_adulto");
-        console.log("Cargando para ID:", id); // DEBUG
-
         const res = await api.get(`/recordatorios/${id}`);
         const data = res.data || [];
-        console.log("Datos recibidos de API:", data); // DEBUG
 
         const expandido = [];
         data.forEach(r => {
           const inicio = parseFechaLocal(r.fecha);
           if (!inicio) return;
-
           const duracion = parseInt(r.duracion) || 1;
           const frecuencia = r.frecuencia || "Una vez";
 
@@ -74,7 +77,6 @@ function Calendario({ onBack }) {
             if (frecuencia.startsWith("Cada")) {
               const cadaHoras = parseInt(frecuencia.split(" ")[1]) || 1;
               const [hIni, mIni] = (r.hora || "00:00").split(":").map(Number);
-              
               for (let h = 0; h < 24; h += cadaHoras) {
                 expandido.push({
                   ...r,
@@ -83,111 +85,120 @@ function Calendario({ onBack }) {
                 });
               }
             } else {
-              expandido.push({
-                ...r,
-                fecha: formatearFechaLocal(fechaBase)
-              });
+              expandido.push({ ...r, fecha: formatearFechaLocal(fechaBase) });
             }
           }
         });
-
-        console.log("Datos expandidos final:", expandido); // DEBUG
         setRecordatorios(expandido);
       } catch (e) {
-        console.error("Error en API:", e);
+        console.error(e);
       } finally {
         setLoading(false);
       }
     };
     cargar();
-  }, [currentDate]); // Recargar si cambiamos de mes
+  }, [currentDate]);
 
-  // --- FILTRO ---
   const recordatoriosDelDia = recordatorios.filter(r => {
     const f = parseFechaLocal(r.fecha);
     return esMismoDia(f, selectedDay, month, year);
   });
 
-  const iconoTipo = (tipo) => {
-    if (tipo === "medicamento") return <FaPills className="text-red-500"/>;
-    if (tipo === "agua") return <FaTint className="text-blue-500"/>;
-    if (tipo === "cita") return <FaHeartbeat className="text-green-500"/>;
-    if (tipo === "actividad") return <FaWalking className="text-purple-500"/>;
-    return null;
-  };
-
   return (
-    <div className="w-full h-full bg-gray-100 flex flex-col">
-      {/* Cabecera */}
-      <div className="bg-[#8FAEE6] p-5 text-white flex items-center shadow-md">
+    <div className="w-full h-screen bg-gray-100 flex flex-col overflow-hidden">
+      {/* Header Fijo */}
+      <div className="bg-[#8FAEE6] p-5 text-white flex items-center shadow-md shrink-0">
         <button onClick={onBack} className="mr-4 text-xl"><FaArrowLeft /></button>
-        <h1 className="text-xl font-semibold">Calendario</h1>
+        <h1 className="text-xl font-semibold">Mi Calendario</h1>
       </div>
 
-      {/* Selector de Mes */}
-      <div className="flex items-center justify-between px-6 pt-5">
-        <button onClick={() => { setCurrentDate(new Date(year, month - 1, 1)); setSelectedDay(1); }}><FaChevronLeft /></button>
-        <h2 className="text-lg font-semibold capitalize">{monthName} {year}</h2>
-        <button onClick={() => { setCurrentDate(new Date(year, month + 1, 1)); setSelectedDay(1); }}><FaChevronRight /></button>
-      </div>
+      {/* Contenido con Scroll General */}
+      <div className="flex-1 overflow-y-auto">
+        
+        {/* Selector de Mes */}
+        <div className="flex items-center justify-between px-6 py-4">
+          <button onClick={() => { setCurrentDate(new Date(year, month - 1, 1)); setSelectedDay(1); }}><FaChevronLeft /></button>
+          <h2 className="text-lg font-bold capitalize text-gray-700">{monthName} {year}</h2>
+          <button onClick={() => { setCurrentDate(new Date(year, month + 1, 1)); setSelectedDay(1); }}><FaChevronRight /></button>
+        </div>
 
-      {/* Calendario */}
-      <div className="p-5">
-        <div className="bg-white rounded-2xl shadow-lg p-4">
-          <div className="grid grid-cols-7 text-center text-xs font-bold text-gray-400 mb-3">
-            <p>L</p><p>M</p><p>M</p><p>J</p><p>V</p><p>S</p><p>D</p>
-          </div>
-          <div className="grid grid-cols-7 gap-2">
-            {days.map((day, i) => {
-              if (!day) return <div key={i}></div>;
-              const tieneTareas = recordatorios.some(r => esMismoDia(parseFechaLocal(r.fecha), day, month, year));
-              return (
-                <button
-                  key={i}
-                  onClick={() => setSelectedDay(day)}
-                  className={`h-10 rounded-lg flex flex-col items-center justify-center text-sm relative
-                  ${selectedDay === day ? "bg-[#8FAEE6] text-white" : "text-gray-700"}`}
-                >
-                  {day}
-                  {tieneTareas && <div className={`w-1 h-1 rounded-full mt-0.5 ${selectedDay === day ? "bg-white" : "bg-red-500"}`}></div>}
-                </button>
-              );
-            })}
+        {/* Calendario Visual */}
+        <div className="px-5 mb-4">
+          <div className="bg-white rounded-3xl shadow-sm p-4">
+            <div className="grid grid-cols-7 text-center text-xs font-bold text-gray-400 mb-2">
+              <p>L</p><p>M</p><p>M</p><p>J</p><p>V</p><p>S</p><p>D</p>
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+              {days.map((day, i) => {
+                if (!day) return <div key={i}></div>;
+                const recsDia = recordatorios.filter(r => esMismoDia(parseFechaLocal(r.fecha), day, month, year));
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedDay(day)}
+                    className={`h-14 rounded-2xl flex flex-col items-center justify-center relative transition-all
+                    ${selectedDay === day ? "bg-[#8FAEE6] text-white shadow-md scale-105" : "text-gray-700 hover:bg-blue-50"}`}
+                  >
+                    <span className="font-semibold text-sm">{day}</span>
+                    {/* Iconos pequeños en el día */}
+                    <div className="flex gap-0.5 mt-1">
+                      {recsDia.slice(0, 3).map((r, idx) => (
+                        <div key={idx} className="scale-75">
+                          {iconoTipo(r.tipo)}
+                        </div>
+                      ))}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Lista de recordatorios */}
-      <div className="flex-1 p-5 overflow-y-auto">
-        <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
-          <FaBell className="text-[#8FAEE6]" /> Recordatorios
-        </h3>
-        
-        {loading ? (
-          <p className="text-center text-gray-500 text-sm">Buscando...</p>
-        ) : recordatoriosDelDia.length > 0 ? (
-          recordatoriosDelDia.map((r, idx) => (
-            <div key={idx} className="bg-white rounded-xl shadow-sm p-4 mb-3 flex justify-between items-center border-l-4 border-[#8FAEE6]">
-              <div className="flex items-center gap-3">
-                {iconoTipo(r.tipo)}
-                <div>
-                  <p className="text-xs text-gray-400">{r.hora}</p>
-                  <p className="font-bold text-gray-700 capitalize">{r.tipo}</p>
-                  <p className="text-xs text-gray-500">{r.medicamento || r.titulo || ""}</p>
+        {/* Lista de Recordatorios con Scroll */}
+        <div className="px-5 pb-10">
+          <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2 text-lg">
+            <FaBell className="text-[#8FAEE6]" /> Eventos del día
+          </h3>
+          
+          <div className="space-y-4">
+            {loading ? (
+              <p className="text-center text-gray-500">Cargando...</p>
+            ) : recordatoriosDelDia.length > 0 ? (
+              recordatoriosDelDia.map((r, idx) => (
+                <div key={idx} className="bg-white rounded-2xl shadow-sm p-4 flex items-center justify-between border border-gray-100">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-blue-50 p-3 rounded-xl">
+                      {iconoTipo(r.tipo, "text-xl")}
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-[#8FAEE6]">{r.hora}</p>
+                      <p className="font-bold text-gray-800 capitalize text-md">
+                        {/* Si no hay detalle en la tabla recordatorios, mostramos el Tipo */}
+                        {r.nombre_medicamento || r.titulo || r.tipo}
+                      </p>
+                      {/* Aquí mostramos detalles extras si los hubiera en el objeto */}
+                      <p className="text-xs text-gray-500">
+                        {r.dosis ? `Dosis: ${r.dosis}` : "Revisar indicaciones"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    {r.completado ? (
+                      <span className="bg-green-100 text-green-600 text-[10px] px-2 py-1 rounded-full font-black uppercase">Hecho</span>
+                    ) : (
+                      <span className="bg-amber-100 text-amber-600 text-[10px] px-2 py-1 rounded-full font-black uppercase">Pendiente</span>
+                    )}
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="bg-white rounded-2xl p-10 text-center border-2 border-dashed border-gray-200">
+                <p className="text-gray-400 font-medium">No hay recordatorios programados</p>
               </div>
-              {r.completado ? (
-                <span className="text-xs text-green-500 font-bold">Hecho</span>
-              ) : (
-                <button className="text-[10px] bg-green-100 text-green-600 px-2 py-1 rounded-md font-bold">Pendiente</button>
-              )}
-            </div>
-          ))
-        ) : (
-          <div className="text-center py-10">
-            <p className="text-gray-400 text-sm">No hay nada para el día {selectedDay}</p>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
