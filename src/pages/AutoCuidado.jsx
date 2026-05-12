@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Importamos para la navegación
 import { FaSpa, FaSmile, FaTint, FaPills, FaHeartbeat, FaChevronRight } from "react-icons/fa";
 import api from "../config/api";
 
