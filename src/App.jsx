@@ -146,7 +146,7 @@ useEffect(() => {
         return (
           <Sintomas
             onBack={() => setPantalla("inicio")}
-            onGuardado={() => mostrarExito("Síntomas registrados correctamente")}
+            irAEstadoAnimo={() => setPantalla("animo")}
           />
         );
 
