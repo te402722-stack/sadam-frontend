@@ -48,7 +48,8 @@ function Calendario({ onBack }) {
       }
 
       const [y, m, d] = fechaStr.split("-").map(Number);
-      return new Date(y, m - 1, d);
+// Creamos la fecha al mediodía (12) para tener un margen de error de +/- 12 horas
+return new Date(y, m - 1, d, 12, 0, 0);
 
     } catch {
       return null;
@@ -168,7 +169,8 @@ const data = res.data;
           for (let d = 0; d < duracion; d++) {
 
             const fechaBase = new Date(inicio);
-            fechaBase.setDate(fechaBase.getDate() + d);
+fechaBase.setDate(inicio.getDate() + d);
+fechaBase.setHours(12, 0, 0, 0); // Forzamos mediodía en cada iteración
 
             if (frecuencia === "Diario") {
 
