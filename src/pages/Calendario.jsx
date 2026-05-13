@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   FaArrowLeft, FaChevronLeft, FaChevronRight, 
-  FaBell, FaPills, FaTint, FaHeartbeat, FaWalking 
+  FaBell, FaPills, FaTint, FaHeartbeat, FaWalking, FaCheck 
 } from "react-icons/fa";
 import api from "../config/api";
 
@@ -24,7 +24,29 @@ function Calendario({ onBack }) {
   for (let i = 0; i < startDay; i++) days.push(null);
   for (let i = 1; i <= daysInMonth; i++) days.push(i);
 
-  // --- HELPERS ---
+  // --- NUEVA: Función para marcar como hecho ---
+  const marcarHecho = async (id_recordatorio, fecha) => {
+    try {
+      const id_adulto = localStorage.getItem("id_adulto");
+      // Enviar al backend
+      await api.post("/recordatorios/completar", {
+        id_recordatorio,
+        id_adulto,
+        fecha // Importante para saber qué instancia del calendario es
+      });
+
+      // Actualizar visualmente sin recargar
+      setRecordatorios(prev => prev.map(r => 
+        (r.id_recordatorio === id_recordatorio && r.fecha === fecha) 
+        ? { ...r, completado: 1 } // Usamos 1 o true según tu DB
+        : r
+      ));
+    } catch (err) {
+      console.error("Error al completar:", err);
+    }
+  };
+
+  // --- HELPERS EXISTENTES ---
   const parseFechaLocal = (fechaStr) => {
     if (!fechaStr) return null;
     const limpia = fechaStr.split('T')[0];
@@ -112,9 +134,7 @@ function Calendario({ onBack }) {
         <h1 className="text-xl font-semibold">Mi Calendario</h1>
       </div>
 
-      {/* Contenido con Scroll General */}
       <div className="flex-1 overflow-y-auto">
-        
         {/* Selector de Mes */}
         <div className="flex items-center justify-between px-6 py-4">
           <button onClick={() => { setCurrentDate(new Date(year, month - 1, 1)); setSelectedDay(1); }}><FaChevronLeft /></button>
@@ -140,7 +160,6 @@ function Calendario({ onBack }) {
                     ${selectedDay === day ? "bg-[#8FAEE6] text-white shadow-md scale-105" : "text-gray-700 hover:bg-blue-50"}`}
                   >
                     <span className="font-semibold text-sm">{day}</span>
-                    {/* Iconos pequeños en el día */}
                     <div className="flex gap-0.5 mt-1">
                       {recsDia.slice(0, 3).map((r, idx) => (
                         <div key={idx} className="scale-75">
@@ -155,7 +174,7 @@ function Calendario({ onBack }) {
           </div>
         </div>
 
-        {/* Lista de Recordatorios con Scroll */}
+        {/* Lista de Recordatorios */}
         <div className="px-5 pb-10">
           <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2 text-lg">
             <FaBell className="text-[#8FAEE6]" /> Eventos del día
@@ -174,20 +193,27 @@ function Calendario({ onBack }) {
                     <div>
                       <p className="text-xs font-bold text-[#8FAEE6]">{r.hora}</p>
                       <p className="font-bold text-gray-800 capitalize text-md">
-                        {/* Si no hay detalle en la tabla recordatorios, mostramos el Tipo */}
                         {r.nombre_medicamento || r.titulo || r.tipo}
                       </p>
-                      {/* Aquí mostramos detalles extras si los hubiera en el objeto */}
                       <p className="text-xs text-gray-500">
                         {r.dosis ? `Dosis: ${r.dosis}` : "Revisar indicaciones"}
                       </p>
                     </div>
                   </div>
+
+                  {/* RESTAURADO: Botón de completado o Check */}
                   <div className="flex flex-col items-end">
                     {r.completado ? (
-                      <span className="bg-green-100 text-green-600 text-[10px] px-2 py-1 rounded-full font-black uppercase">Hecho</span>
+                      <div className="bg-green-100 text-green-600 p-2 rounded-full">
+                        <FaCheck size={14} />
+                      </div>
                     ) : (
-                      <span className="bg-amber-100 text-amber-600 text-[10px] px-2 py-1 rounded-full font-black uppercase">Pendiente</span>
+                      <button
+                        onClick={() => marcarHecho(r.id_recordatorio, r.fecha)}
+                        className="bg-white border-2 border-amber-400 text-amber-600 text-[10px] px-3 py-1.5 rounded-xl font-black uppercase active:scale-95 transition-all shadow-sm"
+                      >
+                        Completar
+                      </button>
                     )}
                   </div>
                 </div>

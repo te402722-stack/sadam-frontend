@@ -64,12 +64,11 @@ function App() {
         console.log("🔥 Obteniendo token...");
 
         // Obtener token FCM
-        const token = await getToken(messaging, {
-
-          vapidKey:
-            "BNFJ63aLJFkhYI17rBCdDV_VvN9n123wqrkRqLCQ9cKJBkvHgBGpk1P8PyOkfSelQPINXD_0_CNokp24C53kOC4"
-
-        });
+        // Dentro de useEffect en App.jsx
+const token = await getToken(messaging, {
+  vapidKey: "BNFJ63aLJFkhYI17rBCdDV_VvN9n123wqrkRqLCQ9cKJBkvHgBGpk1P8PyOkfSelQPINXD_0_CNokp24C53kOC4",
+  serviceWorkerRegistration: await navigator.serviceWorker.register("/firebase-messaging-sw.js")
+});
 
         console.log("TOKEN:", token);
 
