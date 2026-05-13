@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { IconActividad, IconAnimo, IconSintomas } from "../components/Iconos";
 import useRecordatorios from "../hooks/useRecordatorios";
 import RecordatorioActivo from "../components/RecordatorioActivo";
-import AlertaOlvido from "../components/AlertaOlvido";
+
 
 function Inicio({ nombre, onRegistrar, onCalendario, onAnimo, onSintomas }) {
   const id_adulto = localStorage.getItem("id_adulto");
@@ -28,11 +28,9 @@ function Inicio({ nombre, onRegistrar, onCalendario, onAnimo, onSintomas }) {
       </div>
 
       {/* ALERTAS - Prioridad visual alta */}
-      {(olvidado || activo) && (
+      {(activo) && (
         <div className="flex flex-col gap-3">
-          {olvidado && mostrarOlvidado && (
-            <AlertaOlvido recordatorio={olvidado} cerrar={() => setMostrarOlvidado(false)} />
-          )}
+      
           {activo && mostrarActivo && (
             <RecordatorioActivo recordatorio={activo} cerrar={() => setMostrarActivo(false)} />
           )}
