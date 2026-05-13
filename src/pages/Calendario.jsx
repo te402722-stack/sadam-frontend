@@ -13,26 +13,25 @@ function Calendario({ onBack }) {
   const [loading, setLoading] = useState(true);
 
   // --- Lógica de validación de tiempo ---
-  const obtenerEstadoRecordatorio = (r) => {
-    if (r.completado) return "COMPLETADO";
+ const obtenerEstadoRecordatorio = (r) => {
+  if (r.completado) return "COMPLETADO";
 
-    const ahora = new Date();
-    const [horas, minutos] = r.hora.split(":").map(Number);
-    const fechaProg = new Date(parseFechaLocal(r.fecha));
-    fechaProg.setHours(horas, minutos, 0);
+  const ahora = new Date();
+  const [horas, minutos] = r.hora.split(":").map(Number);
+  const fechaProg = new Date(parseFechaLocal(r.fecha));
+  fechaProg.setHours(horas, minutos, 0);
 
-    // 15 minutos después de la hora programada
-    const limiteParaCompletar = new Date(fechaProg.getTime() + 15 * 60000);
+  // Definir el límite de los 15 minutos
+  const limiteMaximo = new Date(fechaProg.getTime() + 15 * 60000);
 
-    if (ahora < fechaProg) {
-      return "PENDIENTE"; // Aún no llega la hora
-    } else if (ahora >= fechaProg && ahora < limiteParaCompletar) {
-      return "ESPERA"; // Está en el rango de los 15 min de espera
-    } else if (ahora >= limiteParaCompletar) {
-      return "RETRASADO"; // Ya pasaron los 15 min y no se marcó
-    }
-    return "RETRASADO";
-  };
+  if (ahora < fechaProg) {
+    return "PROXIMO"; // Aún no es la hora
+  } else if (ahora >= fechaProg && ahora <= limiteMaximo) {
+    return "DISPONIBLE"; // Está en el rango de los 15 minutos para marcar
+  } else {
+    return "VENCIDO"; // Ya pasaron los 15 minutos y no se completó
+  }
+};
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
