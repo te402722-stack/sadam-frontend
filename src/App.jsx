@@ -15,7 +15,7 @@ import BottomNav from "./components/BottomNav";
 import AlertasToast from "./components/AlertasToast"; // <--- Importamos el nuevo sistema
 
 import { getToken } from "firebase/messaging";
-import { messaging } from "./firebase";
+import { getMessagingSafe } from "./firebase";
 import api from "./config/api";
 
 function App() {
@@ -36,41 +36,45 @@ function App() {
 
   const obtenerYEnviarToken = async () => {
 
-    try {
+  try {
 
-      const permiso = await Notification.requestPermission();
+    const permiso = await Notification.requestPermission();
 
-      console.log("Permiso:", permiso);
+    console.log("Permiso:", permiso);
 
-      if (permiso !== "granted") {
-        console.log("❌ Notificaciones bloqueadas");
-        return;
-      }
+    if (permiso !== "granted") {
+      console.log("❌ Notificaciones bloqueadas");
+      return;
+    }
 
-      console.log("🔥 Obteniendo token...");
+    const messaging = await getMessagingSafe();
 
-      const token = await getToken(messaging, {
-        vapidKey: "BNFJ63aLJFkhYI17rBCdDV_VvN9n123wqrkRqLCQ9cKJBkvHgBGpk1P8PyOkfSelQPINXD_0_CNokp24C53kOC4"
+    if (!messaging) return;
+
+    console.log("🔥 Obteniendo token...");
+
+    const token = await getToken(messaging, {
+      vapidKey: "BNFJ63aLJFkhYI17rBCdDV_VvN9n123wqrkRqLCQ9cKJBkvHgBGpk1P8PyOkfSelQPINXD_0_CNokp24C53kOC4"
+    });
+
+    console.log("TOKEN:", token);
+
+    if (id_adulto && token) {
+
+      await api.post("/guardar-token", {
+        id_adulto,
+        token
       });
 
-      console.log("TOKEN:", token);
-
-      if (id_adulto && token) {
-
-        await api.post("/guardar-token", {
-          id_adulto,
-          token
-        });
-
-        console.log("✅ Token guardado en backend");
-      }
-
-    } catch (error) {
-
-      console.log("❌ ERROR FIREBASE:", error);
-
+      console.log("✅ Token guardado en backend");
     }
-  };
+
+  } catch (error) {
+
+    console.log("❌ ERROR FIREBASE:", error);
+
+  }
+};
 
   if (usuario) {
     obtenerYEnviarToken();
