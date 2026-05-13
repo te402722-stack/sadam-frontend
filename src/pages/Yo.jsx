@@ -52,14 +52,9 @@ function Yo({ onBack }) {
         setCuidadores(lista);
 
         // 3. Traer Código de Invitación
-        const resCod = await api.get(`/invitaciones/${adultoLocal.id_adulto}`);
-        if (resCod.data && resCod.data.codigo) {
-          setCodigoInvitacion(resCod.data.codigo);
-        } else {
-          // Si no existe, lo generamos
-          const resGen = await api.post("/invitaciones/generar", { id_adulto: adultoLocal.id_adulto });
-          setCodigoInvitacion(resGen.data.codigo);
-        }
+        // 3. Obtener código desde adulto_mayor
+setCodigoInvitacion(datosBD.codigo_invitacion || "");
+
       } catch (error) {
         setMensaje({ texto: "No pudimos cargar toda su información", tipo: "error" });
       } finally {
