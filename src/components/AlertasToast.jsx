@@ -48,6 +48,16 @@ export default function AlertasToast({ id_adulto }) {
         ) {
           // ¡DISPARAR ALERTA!
           setAlertasActivas(prev => [...prev, r]);
+          if (Notification.permission === "granted") {
+
+  new Notification("SADAM", {
+
+    body: `Recordatorio: ${r.tipo}`,
+    icon: "/logo192.png"
+
+  });
+
+}
           
           // Sonido de alerta (opcional, pero ayuda mucho dentro de la app)
           audioRef.current.play().catch(e => console.log("Esperando interacción para sonar"));

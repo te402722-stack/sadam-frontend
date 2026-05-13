@@ -14,8 +14,6 @@ import Sintomas from "./pages/Sintomas";
 import BottomNav from "./components/BottomNav";
 import AlertasToast from "./components/AlertasToast";
 
-import { getToken } from "firebase/messaging";
-import { messaging } from "./firebase";
 import api from "./config/api";
 
 function App() {
@@ -41,69 +39,20 @@ function App() {
 
   };
 
-  /* 🔔 FIREBASE PUSH NOTIFICATIONS */
-  useEffect(() => {
+ useEffect(() => {
 
-    const obtenerYEnviarToken = async () => {
+  if ("Notification" in window) {
 
-      try {
-
-        // Solicitar permiso
-        const permiso =
-          await Notification.requestPermission();
+    Notification.requestPermission()
+      .then((permiso) => {
 
         console.log("Permiso:", permiso);
 
-        if (permiso !== "granted") {
+      });
 
-          console.log("❌ Notificaciones bloqueadas");
-          return;
+  }
 
-        }
-
-        console.log("🔥 Obteniendo token...");
-
-        // Obtener token FCM
-        // Dentro de useEffect en App.jsx
-const token = await getToken(messaging, {
-  vapidKey: "BNFJ63aLJFkhYI17rBCdDV_VvN9n123wqrkRqLCQ9cKJBkvHgBGpk1P8PyOkfSelQPINXD_0_CNokp24C53kOC4",
-  serviceWorkerRegistration: await navigator.serviceWorker.register("/firebase-messaging-sw.js")
-});
-
-        console.log("TOKEN:", token);
-
-        // Guardar token en backend
-        if (id_adulto && token) {
-
-          await api.post("/guardar-token", {
-
-            id_adulto,
-            token
-
-          });
-
-          console.log("✅ Token guardado en backend");
-
-        }
-
-      } catch (error) {
-
-        console.log(
-          "❌ ERROR FIREBASE:",
-          error
-        );
-
-      }
-
-    };
-
-    if (usuario) {
-
-      obtenerYEnviarToken();
-
-    }
-
-  }, [usuario, id_adulto]);
+},  [usuario, id_adulto]);
 
   const renderPantalla = () => {
 

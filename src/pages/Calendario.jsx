@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { 
   FaArrowLeft, FaChevronLeft, FaChevronRight, 
-  FaBell, FaPills, FaTint, FaHeartbeat, FaWalking, FaCheck 
+  FaBell, FaPills, FaTint, FaHeartbeat, FaWalking, FaCheck, FaClock, FaExclamationCircle 
 } from "react-icons/fa";
 import api from "../config/api";
 
@@ -11,6 +11,28 @@ function Calendario({ onBack }) {
   const [selectedDay, setSelectedDay] = useState(today.getDate());
   const [recordatorios, setRecordatorios] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // --- Lógica de validación de tiempo ---
+  const obtenerEstadoRecordatorio = (r) => {
+    if (r.completado) return "COMPLETADO";
+
+    const ahora = new Date();
+    const [horas, minutos] = r.hora.split(":").map(Number);
+    const fechaProg = new Date(parseFechaLocal(r.fecha));
+    fechaProg.setHours(horas, minutos, 0);
+
+    // 15 minutos después de la hora programada
+    const limiteParaCompletar = new Date(fechaProg.getTime() + 15 * 60000);
+
+    if (ahora < fechaProg) {
+      return "PENDIENTE"; // Aún no llega la hora
+    } else if (ahora >= fechaProg && ahora < limiteParaCompletar) {
+      return "ESPERA"; // Está en el rango de los 15 min de espera
+    } else if (ahora >= limiteParaCompletar) {
+      return "RETRASADO"; // Ya pasaron los 15 min y no se marcó
+    }
+    return "RETRASADO";
+  };
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -24,29 +46,19 @@ function Calendario({ onBack }) {
   for (let i = 0; i < startDay; i++) days.push(null);
   for (let i = 1; i <= daysInMonth; i++) days.push(i);
 
-  // --- NUEVA: Función para marcar como hecho ---
   const marcarHecho = async (id_recordatorio, fecha) => {
     try {
       const id_adulto = localStorage.getItem("id_adulto");
-      // Enviar al backend
-      await api.post("/recordatorios/completar", {
-        id_recordatorio,
-        id_adulto,
-        fecha // Importante para saber qué instancia del calendario es
-      });
+      await api.post("/recordatorios/completar", { id_recordatorio, id_adulto, fecha });
 
-      // Actualizar visualmente sin recargar
       setRecordatorios(prev => prev.map(r => 
-        (r.id_recordatorio === id_recordatorio && r.fecha === fecha) 
-        ? { ...r, completado: 1 } // Usamos 1 o true según tu DB
-        : r
+        (r.id_recordatorio === id_recordatorio && r.fecha === fecha) ? { ...r, completado: 1 } : r
       ));
     } catch (err) {
       console.error("Error al completar:", err);
     }
   };
 
-  // --- HELPERS EXISTENTES ---
   const parseFechaLocal = (fechaStr) => {
     if (!fechaStr) return null;
     const limpia = fechaStr.split('T')[0];
@@ -76,7 +88,6 @@ function Calendario({ onBack }) {
     }
   };
 
-  // --- CARGA ---
   useEffect(() => {
     const cargar = async () => {
       try {
@@ -84,18 +95,15 @@ function Calendario({ onBack }) {
         const id = localStorage.getItem("id_adulto");
         const res = await api.get(`/recordatorios/${id}`);
         const data = res.data || [];
-
         const expandido = [];
         data.forEach(r => {
           const inicio = parseFechaLocal(r.fecha);
           if (!inicio) return;
           const duracion = parseInt(r.duracion) || 1;
           const frecuencia = r.frecuencia || "Una vez";
-
           for (let d = 0; d < duracion; d++) {
             const fechaBase = new Date(inicio.getTime());
             fechaBase.setDate(inicio.getDate() + d);
-
             if (frecuencia.startsWith("Cada")) {
               const cadaHoras = parseInt(frecuencia.split(" ")[1]) || 1;
               const [hIni, mIni] = (r.hora || "00:00").split(":").map(Number);
@@ -112,11 +120,7 @@ function Calendario({ onBack }) {
           }
         });
         setRecordatorios(expandido);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
+      } catch (e) { console.error(e); } finally { setLoading(false); }
     };
     cargar();
   }, [currentDate]);
@@ -128,21 +132,18 @@ function Calendario({ onBack }) {
 
   return (
     <div className="w-full h-screen bg-gray-100 flex flex-col overflow-hidden">
-      {/* Header Fijo */}
       <div className="bg-[#8FAEE6] p-5 text-white flex items-center shadow-md shrink-0">
         <button onClick={onBack} className="mr-4 text-xl"><FaArrowLeft /></button>
         <h1 className="text-xl font-semibold">Mi Calendario</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {/* Selector de Mes */}
         <div className="flex items-center justify-between px-6 py-4">
           <button onClick={() => { setCurrentDate(new Date(year, month - 1, 1)); setSelectedDay(1); }}><FaChevronLeft /></button>
           <h2 className="text-lg font-bold capitalize text-gray-700">{monthName} {year}</h2>
           <button onClick={() => { setCurrentDate(new Date(year, month + 1, 1)); setSelectedDay(1); }}><FaChevronRight /></button>
         </div>
 
-        {/* Calendario Visual */}
         <div className="px-5 mb-4">
           <div className="bg-white rounded-3xl shadow-sm p-4">
             <div className="grid grid-cols-7 text-center text-xs font-bold text-gray-400 mb-2">
@@ -162,9 +163,7 @@ function Calendario({ onBack }) {
                     <span className="font-semibold text-sm">{day}</span>
                     <div className="flex gap-0.5 mt-1">
                       {recsDia.slice(0, 3).map((r, idx) => (
-                        <div key={idx} className="scale-75">
-                          {iconoTipo(r.tipo)}
-                        </div>
+                        <div key={idx} className="scale-75">{iconoTipo(r.tipo)}</div>
                       ))}
                     </div>
                   </button>
@@ -174,7 +173,6 @@ function Calendario({ onBack }) {
           </div>
         </div>
 
-        {/* Lista de Recordatorios */}
         <div className="px-5 pb-10">
           <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2 text-lg">
             <FaBell className="text-[#8FAEE6]" /> Eventos del día
@@ -184,40 +182,56 @@ function Calendario({ onBack }) {
             {loading ? (
               <p className="text-center text-gray-500">Cargando...</p>
             ) : recordatoriosDelDia.length > 0 ? (
-              recordatoriosDelDia.map((r, idx) => (
-                <div key={idx} className="bg-white rounded-2xl shadow-sm p-4 flex items-center justify-between border border-gray-100">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-blue-50 p-3 rounded-xl">
-                      {iconoTipo(r.tipo, "text-xl")}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-[#8FAEE6]">{r.hora}</p>
-                      <p className="font-bold text-gray-800 capitalize text-md">
-                        {r.nombre_medicamento || r.titulo || r.tipo}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {r.dosis ? `Dosis: ${r.dosis}` : "Revisar indicaciones"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* RESTAURADO: Botón de completado o Check */}
-                  <div className="flex flex-col items-end">
-                    {r.completado ? (
-                      <div className="bg-green-100 text-green-600 p-2 rounded-full">
-                        <FaCheck size={14} />
+              recordatoriosDelDia.map((r, idx) => {
+                const estado = obtenerEstadoRecordatorio(r);
+                return (
+                  <div key={idx} className="bg-white rounded-2xl shadow-sm p-4 flex items-center justify-between border border-gray-100">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-blue-50 p-3 rounded-xl">
+                        {iconoTipo(r.tipo, "text-xl")}
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => marcarHecho(r.id_recordatorio, r.fecha)}
-                        className="bg-white border-2 border-amber-400 text-amber-600 text-[10px] px-3 py-1.5 rounded-xl font-black uppercase active:scale-95 transition-all shadow-sm"
-                      >
-                        Completar
-                      </button>
-                    )}
+                      <div>
+                        <p className="text-xs font-bold text-[#8FAEE6]">{r.hora}</p>
+                        <p className="font-bold text-gray-800 capitalize text-md">
+                          {r.nombre_medicamento || r.titulo || r.tipo}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {r.dosis ? `Dosis: ${r.dosis}` : "Revisar indicaciones"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-end">
+                      {estado === "COMPLETADO" && (
+                        <div className="bg-green-100 text-green-600 p-2 rounded-full">
+                          <FaCheck size={14} />
+                        </div>
+                      )}
+                      
+                      {estado === "PENDIENTE" && (
+                        <div className="flex items-center gap-1 text-gray-400 text-[10px] font-bold uppercase">
+                          <FaClock /> Pendiente
+                        </div>
+                      )}
+
+                      {estado === "ESPERA" && (
+                        <div className="text-amber-500 text-[9px] font-black uppercase text-right leading-tight">
+                          Esperar 15 min <br/> para marcar
+                        </div>
+                      )}
+
+                      {estado === "RETRASADO" && (
+                        <button
+                          onClick={() => marcarHecho(r.id_recordatorio, r.fecha)}
+                          className="bg-red-50 border-2 border-red-400 text-red-600 text-[10px] px-3 py-1.5 rounded-xl font-black uppercase active:scale-95 transition-all shadow-sm flex items-center gap-1"
+                        >
+                          <FaExclamationCircle /> Completar
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="bg-white rounded-2xl p-10 text-center border-2 border-dashed border-gray-200">
                 <p className="text-gray-400 font-medium">No hay recordatorios programados</p>
