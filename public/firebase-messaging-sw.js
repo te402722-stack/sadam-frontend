@@ -13,47 +13,18 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 🔔 Notificaciones en segundo plano
 messaging.onBackgroundMessage((payload) => {
 
-  console.log("🔔 Background message:", payload);
-
   const notificationTitle =
-    payload?.notification?.title || "Nuevo mensaje";
+    payload.notification?.title || "Nuevo mensaje";
 
   const notificationOptions = {
-    body: payload?.notification?.body || "",
-    icon: "/logo192.png",
-    badge: "/logo192.png",
-    data: payload?.data || {}
+    body: payload.notification?.body || "",
+    icon: "/logo192.png"
   };
 
   self.registration.showNotification(
     notificationTitle,
     notificationOptions
-  );
-});
-
-// 👆 Click en notificación
-self.addEventListener("notificationclick", (event) => {
-
-  event.notification.close();
-
-  event.waitUntil(
-    clients.matchAll({
-      type: "window",
-      includeUncontrolled: true
-    }).then((clientList) => {
-
-      for (const client of clientList) {
-        if ("focus" in client) {
-          return client.focus();
-        }
-      }
-
-      if (clients.openWindow) {
-        return clients.openWindow("/");
-      }
-    })
   );
 });
