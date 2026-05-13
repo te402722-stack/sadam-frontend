@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 
 import Login from "./pages/Login";
 import DatosIniciales from "./pages/DatosIniciales";
@@ -13,77 +12,71 @@ import EstadoAnimo from "./pages/EstadoAnimo";
 import Sintomas from "./pages/Sintomas";
 
 import BottomNav from "./components/BottomNav";
-import RecordatorioActivo from "./components/RecordatorioActivo";
-import AlertaOlvido from "./components/AlertaOlvido";
-
-import { solicitarPermisoNotificaciones } from "./utils/notificaciones";
+import AlertasToast from "./components/AlertasToast"; // <--- Importamos el nuevo sistema
 
 import { getToken } from "firebase/messaging";
 import { getMessagingSafe } from "./firebase";
 import api from "./config/api";
 
 function App() {
-
   const [pantalla, setPantalla] = useState("login");
   const [usuario, setUsuario] = useState(null);
-  const [actividadSeleccionada, setActividadSeleccionada] = useState(null);
   const [mensajeExito, setMensajeExito] = useState(null);
+
+  // Extraemos el ID del adulto de forma segura
+  const id_adulto = usuario?.id_adulto || localStorage.getItem("id_adulto");
 
   const mostrarExito = (mensaje) => {
     setMensajeExito(mensaje);
     setTimeout(() => setMensajeExito(null), 3000);
   };
 
-  /* 🔔 Permiso inicial */
+  /* 🔔 Permiso inicial para Notificaciones de Sistema */
   useEffect(() => {
-    Notification.requestPermission().then(permission => {
-      if (permission === "granted") {
-        console.log("Permiso de notificaciones activado 🔔");
-      }
-    });
+    if ("Notification" in window) {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          console.log("Permiso de notificaciones activado 🔔");
+        }
+      });
+    }
   }, []);
 
-  /* 🔥 OBTENER Y ENVIAR TOKEN (CORRECTO) */
-useEffect(() => {
-  const obtenerYEnviarToken = async () => {
-    try {
-      const messaging = await getMessagingSafe();
-      if (!messaging) return;
+  /* 🔥 Gestión de Token de Firebase (Notificaciones Push Nativa) */
+  useEffect(() => {
+    const obtenerYEnviarToken = async () => {
+      try {
+        const messaging = await getMessagingSafe();
+        if (!messaging) return;
 
-      const token = await getToken(messaging, {
-        vapidKey: "TU_VAPID_KEY" // Reemplaza esto con tu llave real de Firebase
-      });
-
-      console.log("TOKEN:", token);
-
-      if (usuario?.id_adulto && token) {
-        // Usamos 'api' que es lo que importaste arriba
-        await api.post("/guardar-token", {
-          id_adulto: usuario.id_adulto,
-          token: token
+        const token = await getToken(messaging, {
+          vapidKey: "TU_VAPID_KEY" 
         });
-        console.log("✅ Token guardado en backend");
+
+        if (id_adulto && token) {
+          await api.post("/guardar-token", {
+            id_adulto: id_adulto,
+            token: token
+          });
+          console.log("✅ Token guardado en backend");
+        }
+      } catch (error) {
+        console.log("Error obteniendo token:", error);
       }
-    } catch (error) {
-      console.log("Error obteniendo token:", error);
+    };
+
+    if (usuario) {
+      obtenerYEnviarToken();
     }
-  };
-
-  if (usuario) {
-    obtenerYEnviarToken();
-  }
-}, [usuario]);
-
+  }, [usuario, id_adulto]);
 
   const renderPantalla = () => {
-
     switch (pantalla) {
-
       case "login":
         return (
           <Login
-            onLogin={(usuario) => {
-              setUsuario(usuario);
+            onLogin={(u) => {
+              setUsuario(u);
               setPantalla("inicio");
             }}
             onCreateAccount={() => setPantalla("datos")}
@@ -126,10 +119,6 @@ useEffect(() => {
       case "registrar":
         return (
           <RegistrarActividad
-            onSelect={(actividad) => {
-              setActividadSeleccionada(actividad);
-              mostrarExito("Actividad registrada correctamente");
-            }}
             onBack={() => setPantalla("inicio")}
           />
         );
@@ -156,33 +145,36 @@ useEffect(() => {
   };
 
   return (
-  <div className="w-full h-screen flex flex-col overflow-hidden bg-white">
+    <div className="w-full h-screen flex flex-col overflow-hidden bg-white">
+      
+      {/* 🔔 SISTEMA DE ALERTAS OMNIPRESENTE */}
+      {/* Solo se activa si hay un usuario logueado */}
+      {id_adulto && <AlertasToast id_adulto={id_adulto} />}
 
-    {/* PANTALLA */}
-    <div className="flex-1 overflow-hidden">
-      {renderPantalla()}
-    </div>
-
-    {/* NAVBAR */}
-    {pantalla !== "login" && pantalla !== "datos" && (
-      <div className="shrink-0">
-        <BottomNav
-          activo={pantalla}
-          onSelect={(pant) => setPantalla(pant)}
-        />
+      {/* PANTALLA ACTUAL */}
+      <div className="flex-1 overflow-hidden">
+        {renderPantalla()}
       </div>
-    )}
 
-    {/* MENSAJE */}
-    {mensajeExito && (
-      <RegistroExitoso
-        mensaje={mensajeExito}
-        onCerrar={() => setMensajeExito(null)}
-      />
-    )}
+      {/* NAVBAR INFERIOR */}
+      {pantalla !== "login" && pantalla !== "datos" && (
+        <div className="shrink-0">
+          <BottomNav
+            activo={pantalla}
+            onSelect={(pant) => setPantalla(pant)}
+          />
+        </div>
+      )}
 
-  </div>
-);
+      {/* FEEDBACK DE ÉXITO */}
+      {mensajeExito && (
+        <RegistroExitoso
+          mensaje={mensajeExito}
+          onCerrar={() => setMensajeExito(null)}
+        />
+      )}
+    </div>
+  );
 }
 
 export default App;
