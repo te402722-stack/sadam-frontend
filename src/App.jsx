@@ -50,7 +50,7 @@ function App() {
         if (!messaging) return;
 
         const token = await getToken(messaging, {
-          vapidKey: "TU_VAPID_KEY" 
+          vapidKey: "BNFJ63aLJFkhYI17rBCdDV_VvN9n123wqrkRqLCQ9cKJBkvHgBGpk1P8PyOkfSelQPINXD_0_CNokp24C53kOC4" 
         });
 
         if (id_adulto && token) {
