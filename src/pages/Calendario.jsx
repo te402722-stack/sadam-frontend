@@ -12,26 +12,31 @@ function Calendario({ onBack }) {
   const [recordatorios, setRecordatorios] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- Lógica de validación de tiempo ---
- const obtenerEstadoRecordatorio = (r) => {
-  if (r.completado) return "COMPLETADO";
+  // --- Lógica de validación de tiempo CORREGIDA ---
+  const obtenerEstadoRecordatorio = (r) => {
+    if (r.completado) return "COMPLETADO";
 
-  const ahora = new Date();
-  const [horas, minutos] = r.hora.split(":").map(Number);
-  const fechaProg = new Date(parseFechaLocal(r.fecha));
-  fechaProg.setHours(horas, minutos, 0);
+    const ahora = new Date();
+    
+    // Extraemos año, mes y día de la cadena "YYYY-MM-DD"
+    const [y, m, d] = r.fecha.split("-").map(Number);
+    // Extraemos hora y minuto de "HH:MM"
+    const [hh, mm] = r.hora.split(":").map(Number);
 
-  // Definir el límite de los 15 minutos
-  const limiteMaximo = new Date(fechaProg.getTime() + 15 * 60000);
+    // Creamos la fecha exacta del evento (Mes es 0-indexed en JS, por eso m-1)
+    const fechaProg = new Date(y, m - 1, d, hh, mm, 0);
 
-  if (ahora < fechaProg) {
-    return "PROXIMO"; // Aún no es la hora
-  } else if (ahora >= fechaProg && ahora <= limiteMaximo) {
-    return "DISPONIBLE"; // Está en el rango de los 15 minutos para marcar
-  } else {
-    return "VENCIDO"; // Ya pasaron los 15 minutos y no se completó
-  }
-};
+    // Definir el límite de los 15 minutos
+    const limiteMaximo = new Date(fechaProg.getTime() + 15 * 60000);
+
+    if (ahora < fechaProg) {
+      return "PROXIMO"; 
+    } else if (ahora >= fechaProg && ahora <= limiteMaximo) {
+      return "DISPONIBLE"; 
+    } else {
+      return "VENCIDO"; 
+    }
+  };
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -62,7 +67,7 @@ function Calendario({ onBack }) {
     if (!fechaStr) return null;
     const limpia = fechaStr.split('T')[0];
     const [y, m, d] = limpia.split("-").map(Number);
-    return new Date(y, m - 1, d, 12, 0, 0);
+    return new Date(y, m - 1, d); // Quitamos las 12:00:00 para evitar choques
   };
 
   const formatearFechaLocal = (date) => {
@@ -207,25 +212,25 @@ function Calendario({ onBack }) {
                         </div>
                       )}
                       
-                      {estado === "PENDIENTE" && (
-                        <div className="flex items-center gap-1 text-gray-400 text-[10px] font-bold uppercase">
-                          <FaClock /> Pendiente
+                      {estado === "PROXIMO" && (
+                        <div className="text-gray-400 text-[10px] font-bold uppercase flex items-center gap-1">
+                          <FaClock /> Próximo
                         </div>
                       )}
 
-                      {estado === "ESPERA" && (
-                        <div className="text-amber-500 text-[9px] font-black uppercase text-right leading-tight">
-                          Esperar 15 min <br/> para marcar
-                        </div>
-                      )}
-
-                      {estado === "RETRASADO" && (
+                      {estado === "DISPONIBLE" && (
                         <button
                           onClick={() => marcarHecho(r.id_recordatorio, r.fecha)}
-                          className="bg-red-50 border-2 border-red-400 text-red-600 text-[10px] px-3 py-1.5 rounded-xl font-black uppercase active:scale-95 transition-all shadow-sm flex items-center gap-1"
+                          className="bg-amber-400 text-white text-[10px] px-3 py-1.5 rounded-xl font-black uppercase shadow-md active:scale-95"
                         >
-                          <FaExclamationCircle /> Completar
+                          Marcar Hecho
                         </button>
+                      )}
+
+                      {estado === "VENCIDO" && (
+                        <div className="text-red-500 text-[10px] font-black uppercase flex items-center gap-1 bg-red-50 px-2 py-1 rounded-lg">
+                          <FaExclamationCircle /> No completado
+                        </div>
                       )}
                     </div>
                   </div>
