@@ -15,7 +15,7 @@ import BottomNav from "./components/BottomNav";
 import AlertasToast from "./components/AlertasToast"; // <--- Importamos el nuevo sistema
 
 import { getToken } from "firebase/messaging";
-import { getMessagingSafe } from "./firebase";
+import { messaging } from "./firebase";
 import api from "./config/api";
 
 function App() {
@@ -33,42 +33,50 @@ function App() {
 
   /* 🔔 Permiso inicial para Notificaciones de Sistema */
   useEffect(() => {
-    if ("Notification" in window) {
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          console.log("Permiso de notificaciones activado 🔔");
-        }
+
+  const obtenerYEnviarToken = async () => {
+
+    try {
+
+      const permiso = await Notification.requestPermission();
+
+      console.log("Permiso:", permiso);
+
+      if (permiso !== "granted") {
+        console.log("❌ Notificaciones bloqueadas");
+        return;
+      }
+
+      console.log("🔥 Obteniendo token...");
+
+      const token = await getToken(messaging, {
+        vapidKey: "BNFJ63aLJFkhYI17rBCdDV_VvN9n123wqrkRqLCQ9cKJBkvHgBGpk1P8PyOkfSelQPINXD_0_CNokp24C53kOC4"
       });
-    }
-  }, []);
 
-  /* 🔥 Gestión de Token de Firebase (Notificaciones Push Nativa) */
-  useEffect(() => {
-    const obtenerYEnviarToken = async () => {
-      try {
-        const messaging = await getMessagingSafe();
-        if (!messaging) return;
+      console.log("TOKEN:", token);
 
-        const token = await getToken(messaging, {
-          vapidKey: "BNFJ63aLJFkhYI17rBCdDV_VvN9n123wqrkRqLCQ9cKJBkvHgBGpk1P8PyOkfSelQPINXD_0_CNokp24C53kOC4" 
+      if (id_adulto && token) {
+
+        await api.post("/guardar-token", {
+          id_adulto,
+          token
         });
 
-        if (id_adulto && token) {
-          await api.post("/guardar-token", {
-            id_adulto: id_adulto,
-            token: token
-          });
-          console.log("✅ Token guardado en backend");
-        }
-      } catch (error) {
-        console.log("Error obteniendo token:", error);
+        console.log("✅ Token guardado en backend");
       }
-    };
 
-    if (usuario) {
-      obtenerYEnviarToken();
+    } catch (error) {
+
+      console.log("❌ ERROR FIREBASE:", error);
+
     }
-  }, [usuario, id_adulto]);
+  };
+
+  if (usuario) {
+    obtenerYEnviarToken();
+  }
+
+}, [usuario, id_adulto]);
 
   const renderPantalla = () => {
     switch (pantalla) {
