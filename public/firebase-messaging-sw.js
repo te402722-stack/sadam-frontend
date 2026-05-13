@@ -14,8 +14,10 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
 
+  console.log("Mensaje recibido:", payload);
+
   const notificationTitle =
-    payload.notification?.title || "Nuevo mensaje";
+    payload.notification?.title || "SADAM";
 
   const notificationOptions = {
     body: payload.notification?.body || "",

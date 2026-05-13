@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getMessaging, isSupported } from "firebase/messaging";
+import { getMessaging } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: "AIzaSyChzzkqBijf0zZcl_ca71vxg84dLHZS8Pg",
@@ -12,13 +12,4 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-export const getMessagingSafe = async () => {
-  const supported = await isSupported();
-
-  if (!supported) {
-    console.log("FCM no soportado");
-    return null;
-  }
-
-  return getMessaging(app);
-};
+export const messaging = getMessaging(app);
